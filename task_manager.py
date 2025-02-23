@@ -97,14 +97,14 @@ try:
             username , password = login
             login_dict[username] = password
 
-# If the file can not be found print an error message.        
+# If the file can not be found print an error message.       
 except FileNotFoundError:
     print("File \"users.txt\" not found in your directory.")
     exit(1)
 
 username = input("\nPlease enter your username:\n")
 # While the username is not a valid username according to user.txt 
-# the user will be repeatedly asked for a valid username.
+# The user will be repeatedly ask for a valid username.
 while login_dict.get(username) == None:
         username = input("That is not a valid username. Please try again:\n")
 
@@ -120,13 +120,23 @@ while login_dict[username] != password :
 while True:
     # Present the menu to the user and 
     # make sure that the user input is converted to lower case.
-    menu = input('''\nPlease select one of the following options:
+    if username == "admin":
+        menu = input('''\nPlease select one of the following options:
 r - register a user
 a - add task
 va - view all tasks
 vm - view my tasks
+ds - display statistics
 e - exit
 : ''').lower()
+        
+    else: 
+        menu = input("""\nPlease select one of the following options:
+a - add task
+va - view all tasks
+vm - view my tasks
+e - exit
+: """).lower()
 
     # A string which is used to determine if the user wants to continue.
     carry_on = ""
@@ -134,9 +144,13 @@ e - exit
     all_tasks = []
     # Just the task information which is assigned to one user. 
     my_tasks = []
+    # A counter for the number of tasks.
+    task_counter = 0 
 
-    # If the user wishes to register a new user.
-    if menu == 'r':
+
+
+    # If the admin wishes to register a new user.
+    if menu == 'r' and username == "admin":
 
         reg_username = input("\nPlease input the new username:\n")
         reg_username = check_space_comma(reg_username , "both")
@@ -191,11 +205,15 @@ e - exit
     elif menu == 'a':
         
         while True:
+
+            if carry_on == "no":
+                break
+        
             task_person = input("\nTo whom are you assigning this task?\n")
             # If the person is not registered, ask if the user wants to 
             # assign a task to someone who is registered. If yes ask for a
             # registered user. If not they skip the assigning part of the loop.
-            if login_dict.get(task_person) == None and carry_on != "no":
+            if login_dict.get(task_person) == None:
                 carry_on = input("You may only assign tasks to registered" +
                                  " users. \nWould you like to assign a task"
                                  + "to a registered user?\n")
@@ -206,7 +224,6 @@ e - exit
 
         if carry_on == "no":
             continue
-        
 
         task_title = input("\nWhat would you like to call this task?\n")
         task_title = check_space_comma(task_title , ",")
@@ -240,7 +257,7 @@ e - exit
                        f", {task_set_date}, {task_due_date}, No")
         
 
-    # If the user wishes to view all the tasks or just "my tasks".
+    # If the user wishes to view all the tasks.
     elif menu == 'va':
 
         try:
@@ -262,6 +279,7 @@ You will not be able to use the \'va\' or \'vm\' options.""")
         display_tasks(all_tasks)
         
 
+    # If the user wishes to view their tasks.
     elif menu == 'vm':
 
         try:
@@ -273,7 +291,7 @@ You will not be able to use the \'va\' or \'vm\' options.""")
 
                     if line.count(", ") == 5:
                         task_detail = line.strip("\n").split(", ")
-                        # Only add tasks set for username to my_task.
+                        # Only add tasks set for username to my_task
                         if task_detail[0] == username:
                             my_tasks.append(task_detail)
             
@@ -283,14 +301,32 @@ You will not be able to use the \'va\' or \'vm\' options.""")
             continue
 
         display_tasks(my_tasks)
-        
+
+
+    elif menu == "ds" and username == "admin":
+
+        with open("tasks.txt", "r") as file:
+
+            for line in file: 
+
+                if line.count(", ") == 5:
+                    task_counter += 1
+    
+        print("_____________________________________________________________")
+        print(f"\nNumber of tasks:\t{task_counter}")
+        print(f"Number of users:\t{len(login_dict)}")
+        print("_____________________________________________________________")
+            
+
 
     elif menu == 'e':
         print('Goodbye!!!')
         exit()
 
+
     else:
         print("You have entered an invalid input. Please try again")
+
 
 
 
